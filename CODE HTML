@@ -1,0 +1,1168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎫 IT Ticket System - Priority Calculator</title>
+    <style>
+        :root {
+            --bg: #0f172a;
+            --card-bg: #1e293b;
+            --card-border: #334155;
+            --text: #e2e8f0;
+            --text-secondary: #94a3b8;
+            --accent: #6366f1;
+            --accent-glow: #818cf8;
+            --green: #22c55e;
+            --green-bg: #14532d;
+            --green-glow: #4ade80;
+            --yellow: #eab308;
+            --yellow-bg: #713f12;
+            --yellow-glow: #facc15;
+            --red: #ef4444;
+            --red-bg: #7f1d1d;
+            --red-glow: #f87171;
+            --slider-track: #334155;
+            --slider-fill: #6366f1;
+            --toggle-off: #475569;
+            --toggle-on: #22c55e;
+            --code-bg: #0c1222;
+            --badge-operator: #3b82f6;
+            --badge-teamlead: #8b5cf6;
+            --badge-supervisor: #f59e0b;
+            --badge-gerent: #ef4444;
+            --font-mono: 'SF Mono', 'Cascadia Code', 'Consolas', 'Monaco', 'Courier New', monospace;
+            --font-sans: 'Segoe UI', 'Inter', system-ui, -apple-system, sans-serif;
+            --radius: 16px;
+            --radius-sm: 10px;
+            --radius-xs: 6px;
+            --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--bg);
+            background-image:
+                radial-gradient(ellipse at 20% 20%, rgba(99, 102, 241, 0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 60%, rgba(34, 197, 94, 0.05) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 80%, rgba(239, 68, 68, 0.04) 0%, transparent 50%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-sans);
+            color: var(--text);
+            padding: 20px;
+            margin: 0;
+        }
+
+        .main-container {
+            width: 100%;
+            max-width: 720px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            padding: 10px 0;
+        }
+        .header .icon-row {
+            font-size: 52px;
+            margin-bottom: 4px;
+            animation: float 3s ease-in-out infinite;
+        }
+        @keyframes float {
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+        .header h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            background: linear-gradient(135deg, #e2e8f0 0%, #a5b4fc 60%, #818cf8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .header .subtitle {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-top: 2px;
+            letter-spacing: 0.03em;
+        }
+
+        /* Cards */
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius);
+            padding: 24px 28px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            transition: var(--transition);
+        }
+        .card:hover {
+            border-color: #475569;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+        }
+        .card-title {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-secondary);
+            margin-bottom: 18px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .card-title .emoji {
+            font-size: 1.2rem;
+        }
+
+        /* Form Grid */
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px 20px;
+        }
+        @media (max-width: 600px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+        .form-group label {
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: #cbd5e1;
+            letter-spacing: 0.02em;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .form-group label .label-emoji {
+            font-size: 1rem;
+        }
+
+        /* Select & Input */
+        select,
+        input[type="number"] {
+            background: #0f172a;
+            border: 1.5px solid var(--card-border);
+            color: var(--text);
+            padding: 11px 14px;
+            border-radius: var(--radius-sm);
+            font-size: 0.95rem;
+            font-family: var(--font-sans);
+            transition: var(--transition);
+            width: 100%;
+            appearance: none;
+            -webkit-appearance: none;
+            cursor: pointer;
+            outline: none;
+        }
+        select {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 14px center;
+            padding-right: 36px;
+        }
+        input[type="number"] {
+            appearance: textfield;
+            -moz-appearance: textfield;
+            cursor: text;
+        }
+        input[type="number"]::-webkit-outer-spin-button,
+        input[type="number"]::-webkit-inner-spin-button {
+            opacity: 0.6;
+        }
+        select:focus,
+        input[type="number"]:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+            outline: none;
+        }
+        select:hover,
+        input[type="number"]:hover {
+            border-color: #64748b;
+        }
+
+        /* Toggle Switch */
+        .toggle-container {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            background: #0f172a;
+            border: 1.5px solid var(--card-border);
+            border-radius: var(--radius-sm);
+            padding: 10px 16px;
+            transition: var(--transition);
+            cursor: pointer;
+            user-select: none;
+        }
+        .toggle-container:hover {
+            border-color: #64748b;
+        }
+        .toggle-switch {
+            position: relative;
+            width: 52px;
+            height: 28px;
+            flex-shrink: 0;
+        }
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--toggle-off);
+            border-radius: 28px;
+            transition: var(--transition);
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3);
+        }
+        .toggle-slider::before {
+            content: "";
+            position: absolute;
+            height: 22px;
+            width: 22px;
+            left: 3px;
+            bottom: 3px;
+            background: #fff;
+            border-radius: 50%;
+            transition: var(--transition);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        .toggle-switch input:checked+.toggle-slider {
+            background: var(--toggle-on);
+            box-shadow: 0 0 12px rgba(34, 197, 94, 0.4), inset 0 1px 3px rgba(0, 0, 0, 0.2);
+        }
+        .toggle-switch input:checked+.toggle-slider::before {
+            transform: translateX(24px);
+        }
+        .toggle-label {
+            font-weight: 600;
+            font-size: 0.9rem;
+            letter-spacing: 0.02em;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .toggle-multiplier {
+            margin-left: auto;
+            font-weight: 700;
+            font-size: 1rem;
+            color: var(--accent-glow);
+            background: rgba(99, 102, 241, 0.15);
+            padding: 4px 10px;
+            border-radius: 20px;
+            transition: var(--transition);
+            min-width: 40px;
+            text-align: center;
+        }
+        .toggle-multiplier.active {
+            color: var(--green-glow);
+            background: rgba(34, 197, 94, 0.2);
+            animation: pulse-glow 0.5s ease-out;
+        }
+        @keyframes pulse-glow {
+            0%,
+            100% {
+                box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.5);
+            }
+            50% {
+                box-shadow: 0 0 20px 4px rgba(34, 197, 94, 0.35);
+            }
+        }
+
+        /* Time indicator badge */
+        .time-indicator-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .time-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 0.8rem;
+            letter-spacing: 0.03em;
+            transition: var(--transition);
+            white-space: nowrap;
+            flex-shrink: 0;
+            opacity: 0;
+            transform: scale(0.9);
+        }
+        .time-badge.visible {
+            opacity: 1;
+            transform: scale(1);
+        }
+        .time-badge.green {
+            background: var(--green-bg);
+            color: var(--green-glow);
+            box-shadow: 0 0 14px rgba(34, 197, 94, 0.3);
+            border: 1px solid rgba(34, 197, 94, 0.4);
+        }
+        .time-badge.yellow {
+            background: var(--yellow-bg);
+            color: var(--yellow-glow);
+            box-shadow: 0 0 14px rgba(234, 179, 8, 0.3);
+            border: 1px solid rgba(234, 179, 8, 0.4);
+            animation: subtle-shake 0.6s ease-in-out;
+        }
+        .time-badge.red {
+            background: var(--red-bg);
+            color: var(--red-glow);
+            box-shadow: 0 0 18px rgba(239, 68, 68, 0.4);
+            border: 1px solid rgba(239, 68, 68, 0.5);
+            animation: urgent-pulse 1s ease-in-out infinite;
+        }
+        @keyframes subtle-shake {
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+            25% {
+                transform: translateX(-3px);
+            }
+            75% {
+                transform: translateX(3px);
+            }
+        }
+        @keyframes urgent-pulse {
+            0%,
+            100% {
+                box-shadow: 0 0 18px rgba(239, 68, 68, 0.4);
+            }
+            50% {
+                box-shadow: 0 0 30px 8px rgba(239, 68, 68, 0.7);
+            }
+        }
+
+        /* Weight Slider */
+        .slider-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .slider-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .slider-value-display {
+            font-weight: 700;
+            font-size: 1.6rem;
+            color: var(--accent-glow);
+            background: rgba(99, 102, 241, 0.2);
+            padding: 3px 14px;
+            border-radius: 20px;
+            min-width: 48px;
+            text-align: center;
+            transition: var(--transition);
+        }
+        .weight-slider {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 10px;
+            border-radius: 10px;
+            background: linear-gradient(to right,
+                    var(--slider-fill) 0%,
+                    var(--slider-fill) var(--fill-percent, 50%),
+                    var(--slider-track) var(--fill-percent, 50%),
+                    var(--slider-track) 100%);
+            outline: none;
+            cursor: pointer;
+            transition: background 0.15s ease;
+        }
+        .weight-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #fff;
+            border: 3px solid var(--accent);
+            cursor: pointer;
+            box-shadow: 0 0 16px rgba(99, 102, 241, 0.5), 0 4px 8px rgba(0, 0, 0, 0.3);
+            transition: var(--transition);
+        }
+        .weight-slider::-webkit-slider-thumb:hover {
+            box-shadow: 0 0 24px rgba(99, 102, 241, 0.7), 0 6px 12px rgba(0, 0, 0, 0.4);
+            transform: scale(1.08);
+        }
+        .weight-slider::-moz-range-thumb {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #fff;
+            border: 3px solid var(--accent);
+            cursor: pointer;
+            box-shadow: 0 0 16px rgba(99, 102, 241, 0.5), 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+        .slider-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            letter-spacing: 0.04em;
+            padding: 0 4px;
+        }
+
+        /* Results Panel */
+        .results-panel {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-top: 8px;
+        }
+        @media (max-width: 600px) {
+            .results-panel {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        .result-item {
+            background: #0f172a;
+            border-radius: var(--radius-sm);
+            padding: 14px 12px;
+            text-align: center;
+            border: 1px solid var(--card-border);
+            transition: var(--transition);
+        }
+        .result-item .result-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+        }
+        .result-item .result-value {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #e2e8f0;
+            transition: var(--transition);
+        }
+        .result-item.highlight {
+            border-color: var(--accent);
+            box-shadow: 0 0 16px rgba(99, 102, 241, 0.2);
+        }
+        .result-item.highlight .result-value {
+            color: var(--accent-glow);
+            font-size: 1.8rem;
+        }
+
+        /* Total Score Banner */
+        .total-score-banner {
+            background: linear-gradient(135deg, #1e293b 0%, #1a1f3a 50%, #1e293b 100%);
+            border: 2px solid var(--accent);
+            border-radius: var(--radius);
+            padding: 18px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            box-shadow: 0 0 30px rgba(99, 102, 241, 0.2);
+            transition: var(--transition);
+            flex-wrap: wrap;
+        }
+        .total-score-banner.pulse-once {
+            animation: banner-pulse 0.5s ease-out;
+        }
+        @keyframes banner-pulse {
+            0% {
+                box-shadow: 0 0 30px rgba(99, 102, 241, 0.2);
+                transform: scale(1);
+            }
+            50% {
+                box-shadow: 0 0 60px rgba(99, 102, 241, 0.55);
+                transform: scale(1.02);
+            }
+            100% {
+                box-shadow: 0 0 30px rgba(99, 102, 241, 0.2);
+                transform: scale(1);
+            }
+        }
+        .total-label {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+        .total-value {
+            font-size: 2.8rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            color: #fff;
+            text-shadow: 0 0 30px rgba(99, 102, 241, 0.6);
+            transition: var(--transition);
+        }
+        .total-breakdown {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            letter-spacing: 0.03em;
+        }
+
+        /* SQL Code Block */
+        .sql-block {
+            background: var(--code-bg);
+            border: 1.5px solid #1e293b;
+            border-radius: var(--radius-sm);
+            padding: 16px 20px;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            line-height: 1.7;
+            overflow-x: auto;
+            color: #c9d1d9;
+            position: relative;
+            white-space: pre-wrap;
+            word-break: break-all;
+            transition: var(--transition);
+        }
+        .sql-block .sql-keyword {
+            color: #ff7b72;
+        }
+        .sql-block .sql-function {
+            color: #d2a8ff;
+        }
+        .sql-block .sql-string {
+            color: #a5d6ff;
+        }
+        .sql-block .sql-number {
+            color: #79c0ff;
+        }
+        .sql-block .sql-comment {
+            color: #8b949e;
+            font-style: italic;
+        }
+        .sql-block .sql-param {
+            color: #ffa657;
+        }
+        .copy-sql-btn {
+            position: absolute;
+            top: 10px;
+            right: 12px;
+            background: #1e293b;
+            border: 1px solid #334155;
+            color: #94a3b8;
+            padding: 5px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.7rem;
+            font-family: var(--font-sans);
+            transition: var(--transition);
+            letter-spacing: 0.03em;
+        }
+        .copy-sql-btn:hover {
+            background: #334155;
+            color: #e2e8f0;
+            border-color: #64748b;
+        }
+        .copy-sql-btn.copied {
+            background: #14532d;
+            border-color: #22c55e;
+            color: #4ade80;
+        }
+
+        /* Ownership Badge */
+        .ownership-badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.78rem;
+            letter-spacing: 0.03em;
+            transition: var(--transition);
+        }
+        .ownership-badge.operator {
+            background: rgba(59, 130, 246, 0.2);
+            color: #60a5fa;
+            border: 1px solid rgba(59, 130, 246, 0.4);
+        }
+        .ownership-badge.team-leader {
+            background: rgba(139, 92, 246, 0.2);
+            color: #a78bfa;
+            border: 1px solid rgba(139, 92, 246, 0.4);
+        }
+        .ownership-badge.supervisor {
+            background: rgba(245, 158, 11, 0.2);
+            color: #fbbf24;
+            border: 1px solid rgba(245, 158, 11, 0.4);
+        }
+        .ownership-badge.gerent {
+            background: rgba(239, 68, 68, 0.2);
+            color: #f87171;
+            border: 1px solid rgba(239, 68, 68, 0.4);
+        }
+
+        /* Footer */
+        .footer-note {
+            text-align: center;
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            letter-spacing: 0.04em;
+            opacity: 0.7;
+        }
+
+        /* Smooth transitions for all dynamic elements */
+        .dynamic-update {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="main-container">
+        <!-- Header -->
+        <div class="header">
+            <div class="icon-row">🎫</div>
+            <h1>IT Ticket Priority System</h1>
+            <p class="subtitle">⚡ Real-time scoring · SQL function generator</p>
+        </div>
+
+        <!-- Main Form Card -->
+        <div class="card" id="formCard">
+            <div class="card-title">
+                <span class="emoji">📋</span> Ticket Configuration
+            </div>
+            <div class="form-grid">
+                <!-- Type Selector -->
+                <div class="form-group">
+                    <label for="ticketType">
+                        <span class="label-emoji">🏭</span> Type
+                    </label>
+                    <select id="ticketType" aria-label="Ticket type">
+                        <option value="" disabled selected>— Select type —</option>
+                        <option value="SMT" data-points="10">🏭 SMT — 10 pts</option>
+                        <option value="assembler" data-points="2">🔧 Assembler — 2 pts</option>
+                        <option value="entire-line" data-points="8">🏗️ Entire Line — 8 pts</option>
+                    </select>
+                </div>
+
+                <!-- Ownership -->
+                <div class="form-group">
+                    <label for="ownership">
+                        <span class="label-emoji">👤</span> Ownership (Area)
+                    </label>
+                    <select id="ownership" aria-label="Ownership / Area">
+                        <option value="" disabled selected>— Select area —</option>
+                        <option value="operator">🧑‍🔧 Operator</option>
+                        <option value="team-leader">👷 Team Leader</option>
+                        <option value="supervisor">🕵️ Supervisor</option>
+                        <option value="gerent">💼 Gerent</option>
+                    </select>
+                </div>
+
+                <!-- Stop Process Toggle -->
+                <div class="form-group full-width">
+                    <label>
+                        <span class="label-emoji">🛑</span> Stop Process
+                    </label>
+                    <div class="toggle-container" id="toggleContainer" tabindex="0" role="switch" aria-checked="false" aria-label="Stop process toggle">
+                        <label class="toggle-switch" for="stopProcessCheckbox" style="cursor:pointer;">
+                            <input type="checkbox" id="stopProcessCheckbox">
+                            <span class="toggle-slider"></span>
+                        </label>
+                        <span class="toggle-label" id="toggleStatusLabel">🔴 OFF</span>
+                        <span class="toggle-multiplier" id="toggleMultiplier">×1</span>
+                    </div>
+                </div>
+
+                <!-- Time Without Response -->
+                <div class="form-group">
+                    <label for="timeNoResponse">
+                        <span class="label-emoji">⏱️</span> Time Without Response (min)
+                    </label>
+                    <div class="time-indicator-wrapper">
+                        <input type="number" id="timeNoResponse" placeholder="e.g. 15" min="0" max="120" value="" aria-label="Time without response in minutes">
+                        <span class="time-badge" id="timeBadge">—</span>
+                    </div>
+                </div>
+
+                <!-- Weight Slider -->
+                <div class="form-group">
+                    <label>
+                        <span class="label-emoji">⚖️</span> Weight
+                    </label>
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <span style="font-size:0.78rem;color:var(--text-secondary);">Priority weight factor</span>
+                            <span class="slider-value-display" id="weightDisplay">5</span>
+                        </div>
+                        <input type="range" class="weight-slider" id="weightSlider" min="1" max="10" value="5" step="1" aria-label="Weight slider 1 to 10">
+                        <div class="slider-labels">
+                            <span>1 · Low</span>
+                            <span>5 · Med</span>
+                            <span>10 · Critical</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Card -->
+        <div class="card" id="resultsCard">
+            <div class="card-title">
+                <span class="emoji">📊</span> Score Breakdown
+            </div>
+            <div class="results-panel">
+                <div class="result-item" id="resultTypePoints">
+                    <div class="result-label">🏭 Type Points</div>
+                    <div class="result-value">—</div>
+                </div>
+                <div class="result-item" id="resultMultiplier">
+                    <div class="result-label">🛑 Multiplier</div>
+                    <div class="result-value">×1</div>
+                </div>
+                <div class="result-item" id="resultWeight">
+                    <div class="result-label">⚖️ Weight</div>
+                    <div class="result-value">5</div>
+                </div>
+                <div class="result-item highlight" id="resultTotal">
+                    <div class="result-label">⭐ Subtotal</div>
+                    <div class="result-value">—</div>
+                </div>
+            </div>
+            <!-- Total Score Banner -->
+            <div class="total-score-banner" id="totalBanner" style="margin-top:16px;">
+                <div>
+                    <div class="total-label">🎯 Total Priority Score</div>
+                    <div class="total-breakdown" id="totalBreakdownText">Fill all fields to calculate</div>
+                </div>
+                <div class="total-value" id="totalScoreValue">—</div>
+            </div>
+            <!-- Ownership indicator -->
+            <div style="margin-top:12px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                <span style="font-size:0.78rem;color:var(--text-secondary);">🏷️ Area:</span>
+                <span id="ownershipBadgeDisplay" class="ownership-badge" style="opacity:0.5;">—</span>
+                <span style="font-size:0.7rem;color:var(--text-secondary);margin-left:auto;">ℹ️ Ownership indicates area, no points</span>
+            </div>
+        </div>
+
+        <!-- SQL Function Call Display -->
+        <div class="card" id="sqlCard">
+            <div class="card-title">
+                <span class="emoji">💾</span> Generated SQL Function Call
+            </div>
+            <div style="position:relative;">
+                <button class="copy-sql-btn" id="copySqlBtn" title="Copy SQL to clipboard">📋 Copy</button>
+                <div class="sql-block" id="sqlBlock">
+                    <span class="sql-comment">-- Fill all fields to generate SQL function call</span>
+                </div>
+            </div>
+            <div style="margin-top:8px;font-size:0.7rem;color:var(--text-secondary);text-align:right;">
+                🔄 Updates in real-time · Click <strong>Copy</strong> to copy SQL
+            </div>
+        </div>
+
+        <div class="footer-note">
+            🎫 IT Ticket System v2.0 · Emoji-Powered · SQL-Ready
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            // DOM Elements
+            const ticketTypeSelect = document.getElementById('ticketType');
+            const ownershipSelect = document.getElementById('ownership');
+            const stopProcessCheckbox = document.getElementById('stopProcessCheckbox');
+            const toggleContainer = document.getElementById('toggleContainer');
+            const toggleStatusLabel = document.getElementById('toggleStatusLabel');
+            const toggleMultiplier = document.getElementById('toggleMultiplier');
+            const timeNoResponseInput = document.getElementById('timeNoResponse');
+            const timeBadge = document.getElementById('timeBadge');
+            const weightSlider = document.getElementById('weightSlider');
+            const weightDisplay = document.getElementById('weightDisplay');
+            const totalScoreValue = document.getElementById('totalScoreValue');
+            const totalBanner = document.getElementById('totalBanner');
+            const totalBreakdownText = document.getElementById('totalBreakdownText');
+            const sqlBlock = document.getElementById('sqlBlock');
+            const copySqlBtn = document.getElementById('copySqlBtn');
+            const ownershipBadgeDisplay = document.getElementById('ownershipBadgeDisplay');
+            const resultTypePoints = document.getElementById('resultTypePoints');
+            const resultMultiplier = document.getElementById('resultMultiplier');
+            const resultWeight = document.getElementById('resultWeight');
+            const resultTotal = document.getElementById('resultTotal');
+
+            // State
+            let currentTypePoints = 0;
+            let currentStopMultiplier = 1;
+            let currentWeight = 5;
+            let currentTimeMinutes = null;
+            let currentOwnership = '';
+            let currentTypeName = '';
+
+            // Type points mapping
+            const typePointsMap = {
+                'SMT': 10,
+                'assembler': 2,
+                'entire-line': 8,
+            };
+            const typeEmojiMap = {
+                'SMT': '🏭',
+                'assembler': '🔧',
+                'entire-line': '🏗️',
+            };
+            const typeLabelMap = {
+                'SMT': 'SMT',
+                'assembler': 'Assembler',
+                'entire-line': 'Entire Line',
+            };
+
+            // Ownership CSS class mapping
+            const ownershipClassMap = {
+                'operator': 'operator',
+                'team-leader': 'team-leader',
+                'supervisor': 'supervisor',
+                'gerent': 'gerent',
+            };
+            const ownershipLabelMap = {
+                'operator': '🧑‍🔧 Operator',
+                'team-leader': '👷 Team Leader',
+                'supervisor': '🕵️ Supervisor',
+                'gerent': '💼 Gerent',
+            };
+
+            /**
+             * Updates the time badge color based on minutes without response.
+             * Rules:
+             *   - 0–10 min  → Green  🟢
+             *   - 11–20 min → Yellow 🟡
+             *   - 21+ min   → Red    🔴
+             */
+            function updateTimeBadge() {
+                const rawValue = timeNoResponseInput.value.trim();
+                if (rawValue === '' || isNaN(parseInt(rawValue, 10))) {
+                    currentTimeMinutes = null;
+                    timeBadge.textContent = '—';
+                    timeBadge.className = 'time-badge';
+                    return;
+                }
+                const minutes = parseInt(rawValue, 10);
+                currentTimeMinutes = Math.max(0, minutes);
+                timeBadge.classList.add('visible');
+
+                if (currentTimeMinutes <= 10) {
+                    timeBadge.textContent = '🟢 OK — ≤10 min';
+                    timeBadge.className = 'time-badge visible green';
+                } else if (currentTimeMinutes <= 20) {
+                    timeBadge.textContent = '🟡 WARN — 11–20 min';
+                    timeBadge.className = 'time-badge visible yellow';
+                } else {
+                    timeBadge.textContent = '🔴 CRITICAL — 21+ min';
+                    timeBadge.className = 'time-badge visible red';
+                }
+            }
+
+            /**
+             * Updates the stop process toggle UI and state.
+             */
+            function updateStopProcess() {
+                const isOn = stopProcessCheckbox.checked;
+                currentStopMultiplier = isOn ? 2 : 1;
+                toggleStatusLabel.textContent = isOn ? '🟢 ON' : '🔴 OFF';
+                toggleMultiplier.textContent = '×' + currentStopMultiplier;
+                if (isOn) {
+                    toggleMultiplier.classList.add('active');
+                } else {
+                    toggleMultiplier.classList.remove('active');
+                }
+                toggleContainer.setAttribute('aria-checked', isOn ? 'true' : 'false');
+            }
+
+            /**
+             * Updates the weight display and slider fill.
+             */
+            function updateWeight() {
+                currentWeight = parseInt(weightSlider.value, 10);
+                weightDisplay.textContent = currentWeight;
+                // Update slider fill percentage for the gradient
+                const percent = ((currentWeight - 1) / 9) * 100;
+                weightSlider.style.setProperty('--fill-percent', percent + '%');
+            }
+
+            /**
+             * Updates the ownership badge display.
+             */
+            function updateOwnershipBadge() {
+                const val = ownershipSelect.value;
+                currentOwnership = val;
+                if (val && ownershipLabelMap[val]) {
+                    ownershipBadgeDisplay.textContent = ownershipLabelMap[val];
+                    ownershipBadgeDisplay.className = 'ownership-badge ' + (ownershipClassMap[val] || '');
+                    ownershipBadgeDisplay.style.opacity = '1';
+                } else {
+                    ownershipBadgeDisplay.textContent = '—';
+                    ownershipBadgeDisplay.className = 'ownership-badge';
+                    ownershipBadgeDisplay.style.opacity = '0.5';
+                }
+            }
+
+            /**
+             * Calculates the total score and updates all result displays.
+             * Total = Type Points × Stop Process Multiplier × Weight
+             */
+            function calculateAndUpdateResults() {
+                const typeVal = ticketTypeSelect.value;
+                if (typeVal && typePointsMap[typeVal] !== undefined) {
+                    currentTypePoints = typePointsMap[typeVal];
+                    currentTypeName = typeLabelMap[typeVal];
+                } else {
+                    currentTypePoints = 0;
+                    currentTypeName = '';
+                }
+
+                // Update result panels
+                if (currentTypePoints > 0) {
+                    resultTypePoints.querySelector('.result-value').textContent = currentTypePoints + ' pts';
+                } else {
+                    resultTypePoints.querySelector('.result-value').textContent = '—';
+                }
+                resultMultiplier.querySelector('.result-value').textContent = '×' + currentStopMultiplier;
+                resultWeight.querySelector('.result-value').textContent = currentWeight;
+
+                // Calculate subtotal (type × multiplier) and total (× weight)
+                const subtotal = currentTypePoints * currentStopMultiplier;
+                const total = subtotal * currentWeight;
+
+                if (currentTypePoints > 0) {
+                    resultTotal.querySelector('.result-value').textContent = subtotal + ' pts';
+                } else {
+                    resultTotal.querySelector('.result-value').textContent = '—';
+                }
+
+                // Update total score banner
+                if (currentTypePoints > 0) {
+                    totalScoreValue.textContent = total + ' pts';
+                    totalBreakdownText.textContent =
+                        '(' + currentTypeName + ' ' + currentTypePoints + ' pts × ' + currentStopMultiplier +
+                        ' stop-mult) × weight ' + currentWeight + ' = ' + total + ' pts';
+                    totalBanner.style.borderColor = 'var(--accent)';
+                    totalBanner.style.boxShadow = '0 0 30px rgba(99,102,241,0.25)';
+                    // Pulse animation
+                    totalBanner.classList.remove('pulse-once');
+                    void totalBanner.offsetWidth;
+                    totalBanner.classList.add('pulse-once');
+                } else {
+                    totalScoreValue.textContent = '—';
+                    totalBreakdownText.textContent = 'Select a ticket type to calculate';
+                    totalBanner.style.borderColor = 'var(--card-border)';
+                    totalBanner.style.boxShadow = '0 8px 32px rgba(0,0,0,0.3)';
+                }
+
+                // Generate SQL
+                generateSQL(total);
+            }
+
+            /**
+             * Generates a realistic SQL function call string and updates the display.
+             */
+            function generateSQL(totalScore) {
+                const typeVal = ticketTypeSelect.value || 'UNSELECTED';
+                const isStopOn = stopProcessCheckbox.checked;
+                const timeVal = (currentTimeMinutes !== null) ? currentTimeMinutes : 'NULL';
+                const ownershipVal = ownershipSelect.value || 'UNSELECTED';
+                const weightVal = currentWeight;
+                const typePts = currentTypePoints;
+
+                let sqlLines = [];
+                sqlLines.push('<span class="sql-comment">-- 🎫 IT Ticket Priority Calculator</span>');
+                sqlLines.push('<span class="sql-comment">-- Function: insert_ticket_with_priority</span>');
+                sqlLines.push('');
+                sqlLines.push('<span class="sql-keyword">SELECT</span> ticket_system.<span class="sql-function">fn_insert_ticket_priority</span>(');
+                sqlLines.push('    <span class="sql-param">p_ticket_type</span>        => <span class="sql-string">\'' +
+                    typeVal + '\'</span><span class="sql-comment">     -- ' + (typePts > 0 ? typePts +
+                        ' base points' : 'no type selected') + '</span>');
+                sqlLines.push('    <span class="sql-param">p_stop_process</span>      => <span class="sql-keyword">' + (
+                    isStopOn ? 'TRUE' : 'FALSE') + '</span><span class="sql-comment">      -- ' + (isStopOn ? 'ON  → ×2 multiplier' :
+                    'OFF → ×1 multiplier') + '</span>');
+                sqlLines.push('    <span class="sql-param">p_time_no_response</span>  => <span class="sql-number">' + timeVal +
+                    '</span><span class="sql-comment">  -- minutes without response</span>');
+                sqlLines.push('    <span class="sql-param">p_ownership</span>         => <span class="sql-string">\'' +
+                    ownershipVal + '\'</span><span class="sql-comment">  -- area indicator</span>');
+                sqlLines.push('    <span class="sql-param">p_weight</span>            => <span class="sql-number">' +
+                    weightVal + '</span><span class="sql-comment">           -- priority weight factor</span>');
+                sqlLines.push(') <span class="sql-keyword">AS</span> total_priority_score;');
+                sqlLines.push('');
+                if (typePts > 0) {
+                    sqlLines.push('<span class="sql-comment">-- ✅ Expected result: ' + totalScore +
+                        ' total points</span>');
+                    sqlLines.push('<span class="sql-comment">-- 📊 Breakdown: ' + typePts + ' pts × ' +
+                        currentStopMultiplier + ' (stop) × ' + weightVal + ' (weight) = ' + totalScore +
+                        ' pts</span>');
+                } else {
+                    sqlLines.push('<span class="sql-comment">-- ⚠️ Please select a ticket type to see the expected result</span>');
+                }
+                // Time color note
+                if (currentTimeMinutes !== null) {
+                    let timeColorNote = '';
+                    if (currentTimeMinutes <= 10) timeColorNote = '🟢 GREEN zone';
+                    else if (currentTimeMinutes <= 20) timeColorNote = '🟡 YELLOW zone';
+                    else timeColorNote = '🔴 RED zone';
+                    sqlLines.push('<span class="sql-comment">-- ⏱️ Time status: ' + timeColorNote + ' (' +
+                        currentTimeMinutes + ' min)</span>');
+                }
+                // Ownership note
+                if (ownershipVal && ownershipLabelMap[ownershipVal]) {
+                    sqlLines.push('<span class="sql-comment">-- 🏷️ Area routed to: ' + ownershipLabelMap[
+                        ownershipVal] + '</span>');
+                }
+
+                sqlBlock.innerHTML = sqlLines.join('\n');
+            }
+
+            /**
+             * Copies the SQL text (plain text version) to clipboard.
+             */
+            function copySQLToClipboard() {
+                const typeVal = ticketTypeSelect.value || 'UNSELECTED';
+                const isStopOn = stopProcessCheckbox.checked;
+                const timeVal = (currentTimeMinutes !== null) ? currentTimeMinutes : 'NULL';
+                const ownershipVal = ownershipSelect.value || 'UNSELECTED';
+                const weightVal = currentWeight;
+                const typePts = currentTypePoints;
+                const totalScore = (typePts > 0) ? (typePts * currentStopMultiplier * weightVal) : null;
+
+                let plainSQL = '';
+                plainSQL += '-- 🎫 IT Ticket Priority Calculator\n';
+                plainSQL += '-- Function: insert_ticket_with_priority\n\n';
+                plainSQL += 'SELECT ticket_system.fn_insert_ticket_priority(\n';
+                plainSQL += '    p_ticket_type        => \'' + typeVal + '\',\n';
+                plainSQL += '    p_stop_process      => ' + (isStopOn ? 'TRUE' : 'FALSE') + ',\n';
+                plainSQL += '    p_time_no_response  => ' + timeVal + ',\n';
+                plainSQL += '    p_ownership         => \'' + ownershipVal + '\',\n';
+                plainSQL += '    p_weight            => ' + weightVal + '\n';
+                plainSQL += ') AS total_priority_score;\n';
+                if (totalScore !== null) {
+                    plainSQL += '\n-- Expected result: ' + totalScore + ' total points\n';
+                }
+
+                navigator.clipboard.writeText(plainSQL).then(() => {
+                    copySqlBtn.textContent = '✅ Copied!';
+                    copySqlBtn.classList.add('copied');
+                    setTimeout(() => {
+                        copySqlBtn.textContent = '📋 Copy';
+                        copySqlBtn.classList.remove('copied');
+                    }, 2000);
+                }).catch(() => {
+                    // Fallback
+                    const textarea = document.createElement('textarea');
+                    textarea.value = plainSQL;
+                    textarea.style.position = 'fixed';
+                    textarea.style.opacity = '0';
+                    document.body.appendChild(textarea);
+                    textarea.select();
+                    try {
+                        document.execCommand('copy');
+                        copySqlBtn.textContent = '✅ Copied!';
+                        copySqlBtn.classList.add('copied');
+                        setTimeout(() => {
+                            copySqlBtn.textContent = '📋 Copy';
+                            copySqlBtn.classList.remove('copied');
+                        }, 2000);
+                    } catch (e) {
+                        copySqlBtn.textContent = '❌ Failed';
+                        setTimeout(() => {
+                            copySqlBtn.textContent = '📋 Copy';
+                        }, 1500);
+                    }
+                    document.body.removeChild(textarea);
+                });
+            }
+
+            /**
+             * Main update function — called on any input change.
+             */
+            function fullUpdate() {
+                updateStopProcess();
+                updateWeight();
+                updateTimeBadge();
+                updateOwnershipBadge();
+                calculateAndUpdateResults();
+            }
+
+            // Event Listeners
+            ticketTypeSelect.addEventListener('change', fullUpdate);
+            ownershipSelect.addEventListener('change', fullUpdate);
+            stopProcessCheckbox.addEventListener('change', fullUpdate);
+            timeNoResponseInput.addEventListener('input', fullUpdate);
+            weightSlider.addEventListener('input', fullUpdate);
+
+            // Toggle container click (for better UX)
+            toggleContainer.addEventListener('click', function(e) {
+                // Don't toggle if clicking the checkbox itself (it handles its own change)
+                if (e.target === stopProcessCheckbox || e.target.closest('label.toggle-switch')) {
+                    return;
+                }
+                stopProcessCheckbox.checked = !stopProcessCheckbox.checked;
+                fullUpdate();
+            });
+
+            // Keyboard accessibility for toggle
+            toggleContainer.addEventListener('keydown', function(e) {
+                if (e.key === ' ' || e.key === 'Enter') {
+                    e.preventDefault();
+                    stopProcessCheckbox.checked = !stopProcessCheckbox.checked;
+                    fullUpdate();
+                }
+            });
+
+            // Copy SQL button
+            copySqlBtn.addEventListener('click', copySQLToClipboard);
+
+            // Initialize everything
+            function initialize() {
+                updateWeight();
+                updateStopProcess();
+                updateTimeBadge();
+                updateOwnershipBadge();
+                calculateAndUpdateResults();
+                // Set initial slider fill
+                const percent = ((currentWeight - 1) / 9) * 100;
+                weightSlider.style.setProperty('--fill-percent', percent + '%');
+            }
+
+            initialize();
+
+            console.log('🎫 IT Ticket System initialized successfully!');
+            console.log('📋 Features:');
+            console.log('  🏭 Type: SMT=10pts | Assembler=2pts | Entire Line=8pts');
+            console.log('  🛑 Stop Process: ON=×2 | OFF=×1');
+            console.log('  ⏱️ Time: ≤10min=🟢 | 11-20min=🟡 | 21+min=🔴');
+            console.log('  👤 Ownership: Area indicator (no points)');
+            console.log('  ⚖️ Weight: 1-10 priority factor');
+            console.log('  💾 SQL: Real-time function call generation');
+            console.log('  📊 Total = Type Points × Stop Multiplier × Weight');
+        })();
+    </script>
+</body>
+</html>
